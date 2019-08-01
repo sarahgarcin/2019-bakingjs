@@ -1,0 +1,45 @@
+doctype html
+html
+  include snippets/head.jade
+  body(data-page='index')
+    header.large-12
+      h1 baking.js
+
+    div.container
+      div.row
+        div.left.large-3.columns
+          div.add-new-conf-wrapper
+            h2 Ajouter une nouvelle conférence
+            form(onsubmit='return false;' class='add-new-conf-form')
+              input(type="date" class="date" placeholder='Date')
+              input(type="text" class="titre" placeholder='Titre')
+              input(type="text" class="lieu" placeholder='Lieu')
+              input(type="text" class="auteur" placeholder='Auteur(s)')
+              input(type='submit' class='js-add-conf' value='Ajouter')
+        div.right.large-9.columns
+          ul.dossier-list.row
+            h2 Conférences
+
+    .js--templates
+      li.dossier.small-6.medium-3.large-3.columns.end(data-nom)
+        .dossier-inside
+          .content
+            a.folder-link(href title)
+              h3.title
+          .meta-data
+            .lieu
+              h4 lieu&nbsp;:
+              span
+            .date
+              h4 date&nbsp;:
+              span
+            .auteur
+              h4 auteur&nbsp;:
+              span
+
+
+    include snippets/footer.jade
+    //- specific scripts
+    script(src='/js/index.js')
+
+

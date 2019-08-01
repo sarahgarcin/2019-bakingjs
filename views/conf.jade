@@ -1,0 +1,41 @@
+doctype html
+html
+  head
+    link(rel='stylesheet', href='/css/style.css')
+    title #{title} | Baking.js
+  body
+
+    .drop-files-container
+
+    form(enctype="multipart/form-data" id="form")
+     input(type="file" name="files[]" multiple="multiple")
+
+
+    .medias-list
+      ul
+
+    .elif
+      h3 #{title}
+      h3 #{date}
+      h3 #{lieu}
+      h3 #{auteur}
+
+    .js--templates
+      li.image
+        img
+      li.video
+        video(autobuffer autoplay muted)
+          source()
+      li.pdf
+        a
+
+
+    script(src='/socket.io/socket.io.js')
+    script(src='/bower_components/jquery/dist/jquery.min.js')
+    script(src='/bower_components/jquery-ui/jquery-ui.min.js')
+    script(src='/js/libs/jquery.ui.touch-punch.min.js')
+    script(src='/bower_components/foundation/js/foundation.min.js')
+
+    script(src='/js/conf.js')
+
+
