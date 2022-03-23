@@ -19,7 +19,7 @@ socket.on('listAllFolders', onListAllFolders);
 
 jQuery(document).ready(function($) {
 
-	$(document).foundation();
+	// $(document).foundation();
 	init();
 });
 

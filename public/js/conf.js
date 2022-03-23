@@ -13,18 +13,20 @@ socket.on('mediaPosition', onMediaPosition);
 socket.on('mediaRemoved', onMediaRemoved);
 // socket.on('mediaDragPosition', onMediaDragPosition);
 // socket.on('mediaDragPositionForAll', onMediaDragPositionForAll);
-// socket.on('padCleared', padCleared);
+socket.on('padCleared', padCleared);
 
 jQuery(document).ready(function($) {
 
-	$(document).foundation();
+	// $(document).foundation();
 	init();
 });
 
 
 function init(){
 	$(window).on('dragover',function(e){
-		$(".drop-files-container").css('pointer-events', "auto");
+		$(".drop-files-container")
+			.css('pointer-events', "auto")
+			.addClass("dragover");
 		e.preventDefault();
 		e.stopPropagation();
 		return false;
@@ -39,6 +41,7 @@ function init(){
 	// Quand une image est dropper dans la zone
 	$(".drop-files-container").on("drop", function(e) {
 		e.preventDefault();
+		$(".drop-files-container").removeClass("dragover");
 		console.log("DROP FILE");
     var files = e.originalEvent.dataTransfer.files;
     processFileUpload(files); 
@@ -70,6 +73,21 @@ function init(){
 		// console.log(thisFileName);
 		$(this).parents('li').css('display', 'none');
 		socket.emit("removeMedia", {id:thisId, folder: currentFolder, fileName: thisFileName});
+	});
+
+	// Vider le plan de travail
+	$('.clear-btn').on('click', function(){
+		$(".clear-confirm-wrapper").css("display", "block");
+	});
+
+	$('#clear-yes').on('click', function(){
+		$(".clear-confirm-wrapper").css("display", "none");
+		$(".medias-list li").css("display", "none");
+		socket.emit("clearPad", {folder: currentFolder});
+	});
+
+	$('#clear-no').on('click', function(){
+		$(".clear-confirm-wrapper").css("display", "none");
 	});
 
 
@@ -124,14 +142,16 @@ function onListMedias(dataArr){
 			  });
 		}
 
+
+
 		if(ext == 'pdf'){
 			mediaItem = $(".js--templates .pdf").clone(false);
 			mediaItem
 			  .find('a')
 			    .attr('href', path)
-			    .attr('title', data.name)
+			    .attr('title', data.media)
 			    .attr('target', '_blank')
-			    .append(data.name)
+			    .append(data.media)
 			  .end()
 				.attr('id', id)
 				.attr('data-name', data.media)
@@ -160,8 +180,11 @@ function onListMedias(dataArr){
       var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
     	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: fileName, rotation: rotation });
     }
-
 	});
+
+	mediaItem.resizable({
+    aspectRatio: true
+  });
 
 
 	// rendre les medias draggable
@@ -272,7 +295,7 @@ function onNewMedia(data){
 	}
 
 
-	$('.medias-list ul').append(mediaItem);
+	$('.medias-list').append(mediaItem);
 	
 	// Quand je drag and drop une image par la suite = changement de position à enregistrer
 	mediaItem.draggable({
@@ -288,7 +311,13 @@ function onNewMedia(data){
     	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: fileName, rotation: rotation });
     }
 
-	}); 
+	});
+
+	mediaItem.resizable({
+    aspectRatio: true
+  });
+
+
 
 
   //draggable media
@@ -341,6 +370,10 @@ function onMediaPosition(mediaData){
 	// socket.emit('takeScreenShot');
 }
 
+function padCleared(){
+	$(".medias-list li").css("display", "none");
+}
+
 function onMediaDragPosition(pos){
 	$(".medias-list li#"+pos.id)
 		.css({
@@ -357,9 +390,9 @@ function onMediaDragPositionForAll(pos){
 	});	
 }
 
-function padCleared(){
-	location.reload();
-}
+// function padCleared(){
+// 	location.reload();
+// }
 
 /* sockets */
 function onSocketConnect() {

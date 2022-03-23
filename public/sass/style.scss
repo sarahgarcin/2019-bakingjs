@@ -1,9 +1,10 @@
-// I M P O R T
-@import "../bower_components/foundation/scss/normalize";
-@import "../bower_components/foundation/scss/foundation";
-
-
 @import "_variables.scss";
+	
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 
 
 html {
@@ -20,26 +21,135 @@ li{list-style: none;}
 body {
   margin: 0;
   color: #000;
-  font-size: 1em;
-  overflow:hidden;
+  font-size: 16px;
+  font-family: 'nanook', serif;
+  line-height: 1.2;
 }
-input{
-	// opacity:0;
+
+// I N D E X
+body.index {
+	background: $blue;
+	color: #FFF;
 }
+
+.index {
+	header{
+		h1{font-size: 6em; color: #FFF; font-weight: normal;}
+	}
+	.left{padding:0;}
+	.add-new-conf-wrapper{
+		background: #FFF;
+		color: $blue;
+		padding : $margin;
+		h2{
+			margin-top: 0;
+			font-weight: normal;
+		}
+		input{
+			border: 1px solid $blue;
+			display: block; 
+			margin-bottom: $marginSmall;
+			padding: $marginSmall;
+			&[type="submit"]{
+				background: yellow;
+				color: $blue;
+				// border: none;
+				cursor: pointer;
+				transition: all 0.3s linear;
+				&:hover{
+					background: $blue;
+					color: #FFF;
+				}
+			}
+		}
+	}
+	.dossier-list {
+		margin-top:0;
+		li.dossier{
+			color: $blue;
+			padding-right: $margin;
+			margin-bottom: $margin;
+			.dossier-inside{
+				padding: $margin 0;
+				background: #FFF;
+			}
+			a{
+				color: $blue; 
+				text-decoration: none;
+				display: block; 
+				border-bottom: 1px dashed $blue;
+				padding: 0 $margin;
+			}
+			h3{
+				margin:0 0 $marginSmall 0;
+				font-weight: normal;
+				text-align: center;
+				font-size: 1em;
+			}
+			.meta-data{
+				padding: 0 $margin;
+				margin-top: $margin;
+				font-family: "Fira Sans", sans-serif;
+				font-weight: 300;
+				font-size: 1em;
+				> div {
+					margin-bottom: $marginSmall;
+				}
+			}
+		}
+	}
+
+}
+
+// C O N F
+body.conf{
+	overflow: hidden;
+	header{
+		padding: $marginSmall $margin;
+		h1{
+			margin: 0;
+			font-size: 1.2em;
+			font-weight: normal;
+			a{ color: $blue; text-decoration:none;}
+		}
+		h3{
+			font-size: 1.2em;
+			margin: 0;
+			font-weight: normal;
+			font-family: "Fira Sans", sans-serif;
+			color: $blue;
+			text-align: center;
+		}
+	}
+	input{opacity: 0;}
+}
+
 
 .drop-files-container{
 	height:100%;
 	width:100%;
 	position:fixed;
-	//z-index:9999;
+	z-index:9999;
+	pointer-events: none;
+	top:0;
+	left:0;
+	&.dragover{
+		background: yellow; 
+		opacity: 0.5;
+	}
 }
 
 .medias-list{
+	min-height: 100vh;
+	width: 100%;
+	position: absolute;
+	top:0;
+	left:0;
 	li{
 		top:0;
 		left:0;
 		width:25%;
-		position: absolute;
+		position: absolute !important;
 		display:none;
 		&[data-orientation="paysage"]{
 			width: 40%;
@@ -50,48 +160,156 @@ input{
 		img, video{
 			width: 100%;
 		}
-	}
-}
-
-.ligne{
-	width: 1px;
-	border-left: 1px dashed #A19C9F;
-	height:100%;
-	position:fixed;
-	top:0;
-	left:50%;
-	z-index:0;
-}
-
-.titre{
-	position:relative;
-	top:70%;
-	.titre-wrapper{
-		margin:auto;
-		text-align:center;
-		h1{
-			text-transform: uppercase;
-			font-size: 6em;
-			display:inline-block;
-			vertical-align: top;
-			width: 50%;
+		&.pdf{
+			background: #FFF; 
+			border: 1px dashed $blue;
+			padding:$margin;
+			width: auto;
+			a{
+				color: $blue; 
+				text-decoration: none;
+				&:before{
+					content:"📄";
+					margin-right: 5px; 
+					font-size: 1.5em;
+				}
+			}
+		}
+		&:hover{
+			cursor: grab;
+			.delete-btn{display:block;}
+		}
+		.delete-btn{
+			display:none;
+			position: absolute;
+			font-family: "Fira Sans", sans-serif;
+			color: $blue;
+			border: 1px solid $blue; 
+			border-radius: 50%;
+			padding: 7px 12px;
+			top: -15px;
+			right:-15px;
+			background: #FFF;
+			font-size:0.8em;
+			cursor: pointer; 
+			transition: all 0.2s linear;
+			&:hover{
+				background: $blue;
+				color: #FFF;
+			}
+		}
+		.zoom-btn{
+			// display:none;
+			position: absolute;
+			font-family: "Fira Sans", sans-serif;
+			color: $blue;
+			bottom: 0;
+			right:0;
+			background: #FFF;
+			font-size:1.2em;
+			cursor: pointer;
+			background: transparent; 
 		}
 	}
-	h1,h2,h3{
-		text-align:center;
-		font-family: 'nanook', serif;
+}
+
+.clear-btn{
+	position: absolute; 
+	z-index: 9990;
+	background: #FFF;
+	color: $blue;
+	padding: $marginSmall $margin;
+	border: 1px dashed $blue;
+	bottom: $margin; 
+	right: $margin;
+	cursor: pointer; 
+	transition: all 0.2s linear;
+	&:hover{
+		background: $blue;
+		color: #FFF;
 	}
 }
 
-.elif{
-	position: absolute;
-	top: 10px;
-	right:10px;
-	h2, h3{
-	text-align:right;
-	font-family: 'nanook', serif;
+.clear-confirm-wrapper{
+	width: 100%;
+	height: 100vh; 
+	position: fixed; 
+	top: 0; 
+	left: 0;
+	z-index: 99990;
+	display: none;
+	.clear-confirm-outside{
+		background: $blue; 
+		opacity: 0.5;
+		width: 100%;
+		height: 100vh;
 	}
 }
+
+.clear-confirm {
+	position: fixed;
+	z-index: 99999;
+	background: #FFF; 
+	color: $blue;
+	border: 1px dashed $blue;
+	padding: $margin;
+	top: 50vh; 
+	left: 50%;
+	transform: translate(-50%, -100%);
+	p{margin:0 0 $margin 0; }
+	.clear-confirm-btn{
+		border: 1px solid $blue;
+		padding: $marginSmall $margin;
+		display: inline-block;
+		margin-right: $marginSmall;
+		cursor: pointer;
+		transition: all 0.2s linear;
+		&:hover{
+			background: $blue;
+			color: #FFF;
+		}
+	}
+}
+
+// .ligne{
+// 	width: 1px;
+// 	border-left: 1px dashed #A19C9F;
+// 	height:100%;
+// 	position:fixed;
+// 	top:0;
+// 	left:50%;
+// 	z-index:0;
+// }
+
+// .titre{
+// 	position:relative;
+// 	top:70%;
+// 	.titre-wrapper{
+// 		margin:auto;
+// 		text-align:center;
+// 		h1{
+// 			text-transform: uppercase;
+// 			font-size: 6em;
+// 			display:inline-block;
+// 			vertical-align: top;
+// 			width: 50%;
+// 		}
+// 	}
+// 	h1,h2,h3{
+// 		text-align:center;
+// 		font-family: 'nanook', serif;
+// 	}
+// }
+
+// .elif{
+// 	position: absolute;
+// 	top: 10px;
+// 	right:10px;
+// 	h2, h3{
+// 	text-align:right;
+// 	font-family: 'nanook', serif;
+// 	}
+// }
 
 .js--templates{
 	display:none;

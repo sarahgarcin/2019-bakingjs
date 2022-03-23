@@ -1,43 +1,65 @@
 doctype html
 html
-  head
-    link(rel='stylesheet', href='/css/style.css')
-    title #{title} | Baking.js
-  body
-
+  //- head
+  //-   link(rel='stylesheet', href='/css/style.css')
+  //-   title #{title} | Baking.js
+  include snippets/head.jade
+  body.conf
+    header.col-xs-12.row
+      h1.col-xs-4 
+        a(href="/" title="baking.js") baking.js
+      h3.col-xs-2  #{title}
+      h3.col-xs-2  #{date}
+      h3.col-xs-2  #{lieu}
+      h3.col-xs-2  #{auteur}
+    
     .drop-files-container
 
     form(enctype="multipart/form-data" id="form")
      input(type="file" name="files[]" multiple="multiple")
 
 
-    .medias-list
-      ul
+    ul.medias-list
+      
 
-    .elif
-      h3 #{title}
-      h3 #{date}
-      h3 #{lieu}
-      h3 #{auteur}
+    //- .elif
+    //-   h3 #{title}
+    //-   h3 #{date}
+    //-   h3 #{lieu}
+    //-   h3 #{auteur}
 
     .js--templates
       li.image
         img
         div.delete-btn X
+        //- div.zoom-btn ↘
       li.video
         video(autobuffer autoplay muted)
           source()
         div.delete-btn X
+        //- div.zoom-btn ↘
       li.pdf
         a
         div.delete-btn X
+        //- div.zoom-btn ↘
 
 
-    script(src='/socket.io/socket.io.js')
-    script(src='/bower_components/jquery/dist/jquery.min.js')
-    script(src='/bower_components/jquery-ui/jquery-ui.min.js')
-    script(src='/js/libs/jquery.ui.touch-punch.min.js')
-    script(src='/bower_components/foundation/js/foundation.min.js')
+    div.clear-btn vider
+
+    div.clear-confirm-wrapper
+      div.clear-confirm-outside
+      div.clear-confirm 
+        p Êtes-vous sûr·e de vouloir vider le plan de travail ?
+        div#clear-yes.clear-confirm-btn oui
+        div#clear-no.clear-confirm-btn non
+
+
+    include snippets/footer.jade
+    //- script(src='/socket.io/socket.io.js')
+    //- script(src='/bower_components/jquery/dist/jquery.min.js')
+    //- script(src='/bower_components/jquery-ui/jquery-ui.min.js')
+    //- script(src='/js/libs/jquery.ui.touch-punch.min.js')
+    //- script(src='/bower_components/foundation/js/foundation.min.js')
 
     script(src='/js/conf.js')
 

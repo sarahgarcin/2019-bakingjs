@@ -25,6 +25,7 @@ module.exports = function(app, io){
     socket.on('dropPosition', function (data){ onDropPosition(data); });
     socket.on('dragMediaPos', function (data){ onDragMediaPos(data, socket); });
     socket.on('removeMedia', function (data){ onRemoveMedia(data, socket); });
+    socket.on('clearPad', function (data){ onClearPad(data, socket); });
 
 
 		// socket.on('dropPosition', onDropPosition);
@@ -225,6 +226,27 @@ module.exports = function(app, io){
       console.error(err)
     }
 
+  }
+
+  function onClearPad(data, socket){
+    var folderPath = path.join('sessions', data.folder) 
+    fs.readdir(folderPath, (err, files) => {
+      if (err) throw err;
+
+      for (const file of files) {
+        // console.log(config.confMetafilename + config.metaFileext);
+        if(file != config.confMetafilename + config.metaFileext){
+          // console.log(file);
+          fs.unlink(path.join(folderPath, file), err => {
+            if (err) throw err;
+            else{
+              sendEventWithContent( 'padCleared', {folder: folderPath}, socket, true);
+            }
+          });
+        }
+        
+      }
+    });
   }
 
 	// function onDropPosition(mouse){

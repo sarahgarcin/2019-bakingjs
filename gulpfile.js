@@ -7,7 +7,7 @@ var concat = require('gulp-concat');
 var minifyCss = require('gulp-minify-css');
 var plumber = require('gulp-plumber');
 var rename = require('gulp-rename');
-var sass = require('gulp-sass');
+const sass = require('gulp-sass')(require('sass'));
 // var uglify = require('gulp-uglify');
 
 // Compile Our Sass
@@ -35,8 +35,8 @@ gulp.task('css', function() {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
-  gulp.watch('public/sass/*.scss', ['sass', 'css']);
+  gulp.watch('public/sass/*.scss', gulp.series('sass', 'css'));
 });
 
 // Default Task
-gulp.task('default', ['sass', 'css', 'watch']);
+gulp.task('default', gulp.series('sass', 'css', 'watch'));
