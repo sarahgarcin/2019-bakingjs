@@ -1,7 +1,7 @@
 var express = require("express");
 var app     = express();
 var http    = require("http").createServer(app);
-var io      = require("socket.io").listen(http);
+const io = require('socket.io')(http);
 // var readDir = require('readdir');
 
 var main    = require('./main');

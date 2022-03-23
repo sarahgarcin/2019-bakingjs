@@ -82,7 +82,6 @@ module.exports = function(app,io,m){
               "id" : slugg(name), 
               "x" : 0,
               "y": 0,
-              "z": 1
             };
           storeData(confPath + '/' + name + config.metaFileext, fmeta, "create").then(function( meta) {
             console.log('sucess ', meta); 
@@ -97,7 +96,6 @@ module.exports = function(app,io,m){
             "id" : slugg(name), 
             "x" : 0,
             "y": 0,
-            "z": 1
           };
           reject( objectJson);
         }

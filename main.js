@@ -19,7 +19,12 @@ module.exports = function(app, io){
 		// I N D E X
 		socket.on('newConf', onNewConf);
 		socket.on( 'listConf', function (data){ onListConf(socket); });
+
+    // C O N F
     socket.on( 'listAllMedias', function (data){ onListMedias(data, socket); });
+    socket.on('dropPosition', function (data){ onDropPosition(data); });
+    socket.on('dragMediaPos', function (data){ onDragMediaPos(data, socket); });
+    socket.on('removeMedia', function (data){ onRemoveMedia(data, socket); });
 
 
 		// socket.on('dropPosition', onDropPosition);
@@ -123,31 +128,130 @@ module.exports = function(app, io){
 		// }
 	}
 
-	function onDropPosition(mouse){
-		io.sockets.emit("mediaPosition", mouse);
+  // C O N F      P A G E  
+  function onDropPosition(mediaData){
+    return new Promise(function(resolve, reject) {
+      console.log("update drop position");
+      console.log(mediaData);
+      let folderPath = getFullPath(mediaData.folder);
+      let mediaMetaPath = getMetaFileOfMedia(folderPath, mediaData.fileName);
+      console.log(mediaMetaPath);
+      // update meta data file 
+      var fmeta =
+        {
+          "media" : mediaData.fileName,
+          "id" : mediaData.id, 
+          "x" : mediaData.mediaX,
+          "y" : mediaData.mediaY, 
+          "rotation" : mediaData.rotation
+        };
+      // storeData(mediaMetaPath, fmeta, "update").then(function( meta) {
+      //   console.log(meta);
+      //   resolve(meta);
+      // });
+      storeData(mediaMetaPath, fmeta, "update").then(
+        (meta) => {
+          console.log(
+            `Updated media meta file at path: ${mediaMetaPath} with meta: ${JSON.stringify(
+              meta,
+              null,
+              4
+            )}`
+          );
+          resolve();
+          sendEventWithContent( 'mediaPosition', fmeta);
+        },
+        function (err) {
+          reject(`Couldn't update folder meta : ${err}`);
+        }
+      );
+    });
+    
+  }
 
-		//Save position in json
-	  var jsonFile = 'uploads/lyon.json';
-    var data = fs.readFileSync(jsonFile,"UTF-8");
-    var jsonObj = JSON.parse(data);
-    for (var i = 0; i < jsonObj["files"].length; i++){
-		  if (jsonObj["files"][i].id == mouse.id){
-		  	jsonObj["files"][i]["xPos"] = mouse.mediaX;
-		  	jsonObj["files"][i]["yPos"] = mouse.mediaY;
-		  	jsonObj["files"][i]["zPos"] = mouse.mediaZ;
-		  	jsonObj["files"][i]["random"] = mouse.random;
-		  	console.log(jsonObj);
-		  	var jsonString = JSON.stringify(jsonObj, null, 4);
-	      fs.writeFile(jsonFile, jsonString, function(err) {
-	        if(err) {
-	            console.log(err);
-	        } else {
-	            console.log("file drop -> The file was saved!");
-	        }
-	      });
-		  }
-		}	
-	}
+  function onDragMediaPos(mediaData, socket){
+    return new Promise(function(resolve, reject) {
+      console.log("------ ON DRAG MEDIA POS");
+      console.log(mediaData);
+      let folderPath = getFullPath(mediaData.folder);
+      let mediaMetaPath = getMetaFileOfMedia(folderPath, mediaData.fileName);
+      console.log(mediaMetaPath);
+      // update meta data file 
+      var fmeta =
+        {
+          "media" : mediaData.fileName,
+          "id" : mediaData.id, 
+          "x" : mediaData.x,
+          "y" : mediaData.y, 
+          "rotation" : mediaData.rotation
+        };
+      storeData(mediaMetaPath, fmeta, "update").then(
+        (meta) => {
+          console.log(
+            `Updated media meta file at path: ${mediaMetaPath} with meta: ${JSON.stringify(
+              meta,
+              null,
+              4
+            )}`
+          );
+          resolve();
+          sendEventWithContent( 'mediaPosition', fmeta, socket, true);
+        },
+        function (err) {
+          reject(`Couldn't update folder meta : ${err}`);
+        }
+      );
+    });
+  }
+
+  function onRemoveMedia(mediaData, socket){
+    var folderPath = mediaData.folder;
+    var fileName = mediaData.fileName;
+    console.log(`COMMON — removeMedia : will remove media at path: ${folderPath}/${fileName}`);
+    let mediaMetaPath = path.join('sessions', getMetaFileOfMedia(folderPath, fileName));
+    let mediaPath = path.join('sessions', folderPath +'/'+ fileName);
+    // console.log(mediaMetaPath, mediaPath);
+    try {
+      fs.unlinkSync(mediaMetaPath)
+      console.log('removed' + mediaMetaPath);
+    } catch(err) {
+      console.error(err)
+    }
+    try {
+      fs.unlinkSync(mediaPath)
+      console.log('removed' + mediaPath);
+      sendEventWithContent( 'mediaRemoved', {id: mediaData.id}, socket, true);
+    } catch(err) {
+      console.error(err)
+    }
+
+  }
+
+	// function onDropPosition(mouse){
+	// 	io.sockets.emit("mediaPosition", mouse);
+
+	// 	//Save position in json
+	//   var jsonFile = 'uploads/lyon.json';
+ //    var data = fs.readFileSync(jsonFile,"UTF-8");
+ //    var jsonObj = JSON.parse(data);
+ //    for (var i = 0; i < jsonObj["files"].length; i++){
+	// 	  if (jsonObj["files"][i].id == mouse.id){
+	// 	  	jsonObj["files"][i]["xPos"] = mouse.mediaX;
+	// 	  	jsonObj["files"][i]["yPos"] = mouse.mediaY;
+	// 	  	jsonObj["files"][i]["zPos"] = mouse.mediaZ;
+	// 	  	jsonObj["files"][i]["random"] = mouse.random;
+	// 	  	console.log(jsonObj);
+	// 	  	var jsonString = JSON.stringify(jsonObj, null, 4);
+	//       fs.writeFile(jsonFile, jsonString, function(err) {
+	//         if(err) {
+	//             console.log(err);
+	//         } else {
+	//             console.log("file drop -> The file was saved!");
+	//         }
+	//       });
+	// 	  }
+	// 	}	
+	// }
 
 
 	// CONF METHOD !!
@@ -258,6 +362,10 @@ module.exports = function(app, io){
     return folderPath + '/' + config.confMetafilename + config.metaFileext;
   }
 
+  function getMetaFileOfMedia(folderPath, fileName, fileExt) {
+    return folderPath + '/' + fileName + config.metaFileext;
+  }
+
   // C O M M O N     F U N C T I O N S
   function eventAndContent( sendEvent, objectJson) {
     var eventContentJSON =
@@ -268,11 +376,14 @@ module.exports = function(app, io){
     return eventContentJSON;
   }
 
-  function sendEventWithContent( sendEvent, objectContent, socket) {
+  function sendEventWithContent( sendEvent, objectContent, socket, broadcast) {
     var eventAndContentJson = eventAndContent( sendEvent, objectContent);
     console.log("eventAndContentJson " + JSON.stringify( eventAndContentJson, null, 4));
     if( socket === undefined)
       io.sockets.emit( eventAndContentJson["socketevent"], eventAndContentJson["content"]);
+    else if( broadcast === true){
+      socket.broadcast.emit( eventAndContentJson["socketevent"], eventAndContentJson["content"]);
+    }
     else
       socket.emit( eventAndContentJson["socketevent"], eventAndContentJson["content"]);
   }
