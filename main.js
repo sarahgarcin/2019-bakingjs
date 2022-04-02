@@ -26,6 +26,7 @@ module.exports = function(app, io){
     socket.on('dragMediaPos', function (data){ onDragMediaPos(data, socket); });
     socket.on('removeMedia', function (data){ onRemoveMedia(data, socket); });
     socket.on('clearPad', function (data){ onClearPad(data, socket); });
+    socket.on('textCreated', function (data){ onTextCreated(data, socket); });
 
 
 		// socket.on('dropPosition', onDropPosition);
@@ -184,7 +185,8 @@ module.exports = function(app, io){
           "id" : mediaData.id, 
           "x" : mediaData.x,
           "y" : mediaData.y, 
-          "rotation" : mediaData.rotation
+          "rotation" : mediaData.rotation, 
+          "text" : mediaData.text
         };
       storeData(mediaMetaPath, fmeta, "update").then(
         (meta) => {
@@ -247,6 +249,28 @@ module.exports = function(app, io){
         
       }
     });
+  }
+
+  function onTextCreated(data, socket){
+    // créer le fichier texte de meta data
+    var currentFolder = data.folder;
+    var confPath = getFullPath( currentFolder);
+    createTextData(currentFolder, confPath, data).then(function(newMediaData, filePath){
+      console.log("Le fichier de données du média a bien été crée.", newMediaData);
+      socket.broadcast.emit("newMedia", {name: data.name + '.md', id: slugg(data.id), text: data.text });
+      }, function(errorpdata) {
+        console.error("Échec de création du fichier de données du média! Error: ", errorpdata);
+            
+      });
+
+    // createTextMedia(currentFolder, confPath, data.text, data.name).then(function(newMediaData, filePath){
+    //   console.log("Le fichier de données du média a bien été crée.", newMediaData);
+    //   }, function(errorpdata) {
+    //     console.error("Échec de création du fichier de données du média! Error: ", errorpdata);
+            
+    //   });
+
+    
   }
 
 	// function onDropPosition(mouse){
@@ -321,6 +345,68 @@ module.exports = function(app, io){
     });
   }
 
+  function createTextData(slugConfName, confPath, data){
+    return new Promise(function(resolve, reject) {
+      fs.access(path.join(confPath, data.name), fs.F_OK, function( err) {
+        // if there's nothing at path
+        if (err) {
+          var fmeta =
+            {
+              "media" : data.name + ".md",
+              "id" : slugg(data.id), 
+              "x" : data.x,
+              "y": data.y,
+              "rotation" : data.rotation, 
+              "text" : data.text
+            };
+          storeData(confPath + '/' + data.name + ".md" + config.metaFileext, fmeta, "create").then(function( meta) {
+            console.log('sucess ', meta); 
+            resolve( meta);
+          });
+
+        } else {
+          // if there's already something at path
+          console.log("WARNING - the following folder name already exists: " + slugConfName);
+          var objectJson = {
+            "media" : data.name + ".md",
+            "id" : slugg(data.id), 
+            "x" : data.x,
+            "y": data.y,
+            "rotation" : data.rotation,
+            "text" : data.text
+          };
+          reject( objectJson);
+        }
+      });
+    });
+  }
+
+  // function createTextMedia(slugConfName, confPath, text, name){
+  //   return new Promise(function(resolve, reject) {
+  //     fs.access(path.join(confPath, name), fs.F_OK, function( err) {
+  //       // if there's nothing at path
+  //       if (err) {
+  //         var fmeta =
+  //           {
+  //             "text" : text
+  //           };
+  //         storeData(confPath + '/' + name + ".md", fmeta, "create").then(function( meta) {
+  //           console.log('sucess ', meta); 
+  //           resolve( meta);
+  //         });
+
+  //       } else {
+  //         // if there's already something at path
+  //         console.log("WARNING - the following folder name already exists: " + slugConfName);
+  //         var objectJson = {
+  //           "text" : text
+  //         };
+  //         reject( objectJson);
+  //       }
+  //     });
+  //   });
+  // }
+
   function listAllMetaFiles(currentFolder){
     return new Promise(function(resolve, reject) {
       var folderPath = getFullPath( currentFolder)
@@ -334,7 +420,6 @@ module.exports = function(app, io){
         var filesProcessed = 0;
         var allFilesData = [];
         filesList.forEach( function(fileName) {
-          // console.log(fileName);
           var fileData = fs.readFileSync(path.join(folderPath,fileName), "utf8");
           var fileMetadata = parseData( fileData);
           // console.log(fileMetadata);

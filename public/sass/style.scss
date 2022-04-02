@@ -271,6 +271,64 @@ body.conf{
 	}
 }
 
+.text-btn{
+	position: fixed; 
+	z-index: 9990;
+	background: #FFF;
+	color: $blue;
+	padding: $marginSmall $margin;
+	border: 1px dashed $blue;
+	bottom: 75px; 
+	right: $margin;
+	cursor: pointer; 
+	transition: all 0.2s linear;
+	&:hover{
+		background: $blue;
+		color: #FFF;
+	}
+}
+
+.medias-list{
+	.text{
+		border: 1px dashed $blue;
+		background: #FFF;
+		display: block;
+		top: 50vh; 
+		left: 50%;
+		transform: translate(-50%, -100%);
+		padding: 15px;
+		font-family: "Fira Sans", sans-serif;
+		p{color: $blue; font-size: 1.4em; margin:0;}
+		textarea{
+			opacity: 1;
+			border: none;
+			color: $blue;
+			width: 75%;
+			height: 1.4em;
+			display: inline-block;
+			font-size: 1.4em;
+			resize: none;
+		}
+		.submit-btn{
+			background: $blue; 
+			padding: 5px;
+			color: #FFF;
+			width: 30px;
+			margin-left: 20px;
+			text-align: center;
+			cursor: pointer;
+			border: 1px solid $blue;
+			display: inline-block;
+			vertical-align: top;
+			&:hover{
+				background: #FFF; 
+				color: $blue;
+				border: 1px dashed $blue;
+			}
+		}
+	}
+}
+
 // .ligne{
 // 	width: 1px;
 // 	border-left: 1px dashed #A19C9F;

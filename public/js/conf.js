@@ -2,6 +2,8 @@
 var socket = io.connect();
 // var zIndex = 0;
 var currentFolder = window.location.pathname.replace(/^\/([^\/]*).*$/, '$1');;
+var windowW = window.innerWidth;
+var windowH = window.innerHeight; 
 
 /* sockets */
 socket.on('connect', onSocketConnect);
@@ -23,6 +25,11 @@ jQuery(document).ready(function($) {
 
 
 function init(){
+	$(window).on("resize", function(){
+		windowW = window.innerWidth;
+		windowH = window.innerHeight;
+	})
+
 	$(window).on('dragover',function(e){
 		$(".drop-files-container")
 			.css('pointer-events', "auto")
@@ -47,8 +54,11 @@ function init(){
     processFileUpload(files); 
     $(".drop-files-container").css('pointer-events', "none");
     //file data to display it correctly
-    var mediaX = e.offsetX;
- 		var mediaY = e.offsetY;
+    var posX = e.offsetX;
+ 		var posY = e.offsetY;
+ 		// transforme la position en %
+ 		posX = parseInt((posX * 100) / windowW);
+ 		posY = parseInt((posY * 100) / windowH); 
  		var id = convertToSlug(files[0].name);
  		// var fileNameWithExt = files[0].name.split('.');
  		// var fileName = fileNameWithExt[0];
@@ -58,9 +68,9 @@ function init(){
  		// console.log(zIndex);
  		// zIndex ++;
  		var randomRot = Math.floor((Math.random() * 40) - 15);
- 		console.log(mediaX, mediaY, id, randomRot);
+ 		console.log(posX, posY, id, randomRot);
     setTimeout(function(){
-			socket.emit("dropPosition", {mediaX:mediaX, mediaY:mediaY, id:id, rotation:randomRot, fileName : files[0].name, folder: currentFolder});
+			socket.emit("dropPosition", {mediaX:posX, mediaY:posY, id:id, rotation:randomRot, fileName : files[0].name, folder: currentFolder});
   	},200);
   	// forward the file object to your ajax upload method
     return false;
@@ -91,12 +101,59 @@ function init(){
 	});
 
 
+	// Cliquer sur le bouton texte
+	// Ajouter du texte sur le plan de travail
+	$('.text-btn').on('click', function(){
+		mediaItem = $(".js--templates .text").clone(false);
+		var randomRot = Math.floor((Math.random() * 40) - 15);
+		mediaItem.css({
+			'transform' : "rotate("+randomRot+"deg)"
+		});
+		$('.medias-list').append(mediaItem);
 
-	// ctrl + f -> Clear le pad -> supprime toutes les images
-	// $(document).keypress("f",function(e) {
-	//   if(e.ctrlKey)
-	//     socket.emit("clearPad");
-	// });
+
+		var $textarea = mediaItem.find('textarea');
+		$textarea.focus();
+		// mediaItem.draggable({
+		// 	stack: "li", 
+		// 	stop: function(event) {
+	 //    	var offset = $(this).position();
+	 //      var posX = parseInt(offset.left);
+	 //      var posY = parseInt(offset.top);
+	 //      var id = $(this).attr('id')
+	 //      var rotation = getRotationDegrees($(this))
+	 //      var filePath = $(this).find('img').attr('src');
+	 //      var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+	 //    	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: fileName, rotation: rotation });
+	 //    }
+		// });
+
+		// Cliquer sur le bouton ok pour soumettre le texte = envoi l'info sur le serveur
+		mediaItem.find('.submit-btn').on('click', function(){
+			console.log('submit element');
+			var textVal = $textarea.val();
+			mediaItem.prepend("<p>"+textVal+"</p>");
+			$(this).remove();
+			$textarea.remove();
+
+			var id = convertToSlug(textVal + ".md");
+			var slugText = convertToSlug(textVal);
+			var offset = mediaItem.position();
+      var posX = parseInt(offset.left);
+      var posY = parseInt(offset.top);
+
+			socket.emit("textCreated", {text:textVal, x: posX, y:posY, id:id, folder: currentFolder, rotation: randomRot, name : slugText  });
+
+			mediaItem.draggable({
+				stack: "li", 
+				stop: function(event) {
+		      var fileName = slugText + ".md";
+		    	socket.emit("dragMediaPos", {text:textVal, x: posX, y:posY, id:id, folder: currentFolder, fileName: fileName, rotation: randomRot });
+		    }
+			});
+		});
+
+	});
 
 }
 
@@ -117,8 +174,8 @@ function onListMedias(dataArr){
 			  .attr('id', id)
 			  .attr('data-name', data.media)
 			  .css({
-			  	"top": parseInt(data.y),
-			  	"left": parseInt(data.x),
+			  	"top": parseInt(data.y) + 'vh',
+			  	"left": parseInt(data.x) + '%',
 			  	// "z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
@@ -164,6 +221,25 @@ function onListMedias(dataArr){
 			  });
 		}
 
+		if(ext == 'md'){
+			mediaItem = $(".js--templates .text").clone(false);
+			mediaItem
+			  .find('textarea').remove()
+			  .end()
+			  .find('.submit-btn').remove()
+			  .end()
+			  .append('<p>'+data.text+'</p>')
+				.attr('id', id)
+				.attr('data-name', data.media)
+			  .css({
+			  	"top": parseInt(data.y),
+			  	"left": parseInt(data.x),
+			  	// "z-index":data.z,
+			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
+			  	"display":"block"
+			  });
+		}
+
 
 	$('.medias-list').append(mediaItem);
 
@@ -172,13 +248,15 @@ function onListMedias(dataArr){
 		stack: "li", 
 		stop: function(event) {
     	var offset = $(this).position();
-      var posX = parseInt(offset.left);
-      var posY = parseInt(offset.top);
+      var posX = offset.left;
+      var posY = offset.top;
+      // transforme la position en %
+	 		posX = parseInt((posX * 100) / windowW);
+	 		posY = parseInt((posY * 100) / windowH);
       var id = $(this).attr('id')
-      var rotation = getRotationDegrees($(this))
-      var filePath = $(this).find('img').attr('src');
-      var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-    	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: fileName, rotation: rotation });
+      var rotation = getRotationDegrees($(this));
+      // on envoie la data text seulement pour les fichiers textes
+    	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: data.media, rotation: rotation, text : data.text  });
     }
 	});
 
@@ -247,6 +325,7 @@ function onNewMedia(data){
 	var id = data.id;
 	var ext = data.name.split('.').pop();
 	var mediaItem;
+	console.log(data);
 	
 	if(ext == 'jpg' || ext == "jpeg" || ext == "png" || ext == "gif" || ext == "JPG"){
 		console.log("The file is an image");
@@ -294,6 +373,25 @@ function onNewMedia(data){
 		  // });
 	}
 
+	if(ext == 'md'){
+		mediaItem = $(".js--templates .text").clone(false);
+		mediaItem
+		  .find('textarea').remove()
+		  .end()
+		  .find('.submit-btn').remove()
+		  .end()
+		  .append('<p>'+data.text+'</p>')
+			.attr('id', id)
+			.attr('data-name', data.nasme)
+		  // .css({
+		  // 	"top": parseInt(data.y),
+		  // 	"left": parseInt(data.x),
+		  // 	// "z-index":data.z,
+		  // 	"transform":"rotate("+parseInt(data.rotation)+"deg)",
+		  // 	"display":"block"
+		  // });
+	}
+
 
 	$('.medias-list').append(mediaItem);
 	
@@ -302,13 +400,16 @@ function onNewMedia(data){
 		stack: "li", 
 		stop: function(event) {
     	var offset = $(this).position();
-      var posX = parseInt(offset.left);
-      var posY = parseInt(offset.top);
+      var posX = offset.left;
+      var posY = offset.top;
+      // transforme la position en %
+	 		posX = parseInt((posX * 100) / windowW);
+	 		posY = parseInt((posY * 100) / windowH);
       var id = $(this).attr('id')
       var rotation = getRotationDegrees($(this))
-      var filePath = $(this).find('img').attr('src');
-      var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-    	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: fileName, rotation: rotation });
+      // var filePath = $(this).find('img').attr('src');
+      // var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+    	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: data.name, rotation: rotation });
     }
 
 	});
@@ -359,8 +460,8 @@ function onMediaPosition(mediaData){
 
 	$("#" + mediaData.id)
 		.css({
-			"top": mediaData.y,
-	  	"left":mediaData.x,
+			"top": mediaData.y + 'vh',
+	  	"left":mediaData.x + '%',
 	  	"transform":"rotate("+mediaData.rotation+"deg)",
 	  	"display":"block"
 		})
@@ -374,21 +475,21 @@ function padCleared(){
 	$(".medias-list li").css("display", "none");
 }
 
-function onMediaDragPosition(pos){
-	$(".medias-list li#"+pos.id)
-		.css({
-			"top": pos.y,
-	  	"left":pos.x,
-	  	"z-index":pos.z
-		});	
-}
+// function onMediaDragPosition(pos){
+// 	$(".medias-list li#"+pos.id)
+// 		.css({
+// 			"top": pos.y,
+// 	  	"left":pos.x,
+// 	  	"z-index":pos.z
+// 		});	
+// }
 
-function onMediaDragPositionForAll(pos){
-	$(".medias-list li#"+pos.id)
-	.css({
-  	"z-index":pos.z,
-	});	
-}
+// function onMediaDragPositionForAll(pos){
+// 	$(".medias-list li#"+pos.id)
+// 	.css({
+//   	"z-index":pos.z,
+// 	});	
+// }
 
 // function padCleared(){
 // 	location.reload();

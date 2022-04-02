@@ -289,6 +289,66 @@ body.conf input {
   color: #FFF;
 }
 
+.text-btn {
+  position: fixed;
+  z-index: 9990;
+  background: #FFF;
+  color: #0027a4;
+  padding: 10px 20px;
+  border: 1px dashed #0027a4;
+  bottom: 75px;
+  right: 20px;
+  cursor: pointer;
+  transition: all 0.2s linear;
+}
+.text-btn:hover {
+  background: #0027a4;
+  color: #FFF;
+}
+
+.medias-list .text {
+  border: 1px dashed #0027a4;
+  background: #FFF;
+  display: block;
+  top: 50vh;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  padding: 15px;
+  font-family: "Fira Sans", sans-serif;
+}
+.medias-list .text p {
+  color: #0027a4;
+  font-size: 1.4em;
+  margin: 0;
+}
+.medias-list .text textarea {
+  opacity: 1;
+  border: none;
+  color: #0027a4;
+  width: 75%;
+  height: 1.4em;
+  display: inline-block;
+  font-size: 1.4em;
+  resize: none;
+}
+.medias-list .text .submit-btn {
+  background: #0027a4;
+  padding: 5px;
+  color: #FFF;
+  width: 30px;
+  margin-left: 20px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #0027a4;
+  display: inline-block;
+  vertical-align: top;
+}
+.medias-list .text .submit-btn:hover {
+  background: #FFF;
+  color: #0027a4;
+  border: 1px dashed #0027a4;
+}
+
 .js--templates {
   display: none;
 }
