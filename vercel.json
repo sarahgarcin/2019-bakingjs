@@ -2,7 +2,7 @@
   "version": 2,
   "name": "baking.js",
   "builds": [
-    { "src": "./server.js", "use": "@vercel/node" }
+    { "src": ".", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/(.*)", "dest": "/" }
