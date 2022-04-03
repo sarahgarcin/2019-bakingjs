@@ -109,8 +109,10 @@ function init(){
 	$('.text-btn').on('click', function(){
 		mediaItem = $(".js--templates .text").clone(false);
 		var randomRot = Math.floor((Math.random() * 40) - 15);
+		higherZindex ++;
 		mediaItem.css({
-			'transform' : "rotate("+randomRot+"deg)"
+			'transform' : "rotate("+randomRot+"deg)",
+			'z-index' : higherZindex
 		});
 		$('.medias-list').append(mediaItem);
 
@@ -151,8 +153,16 @@ function init(){
 				stack: "li", 
 				stop: function(event) {
 		      var fileName = slugText + ".md";
+		      var offset = $(this).position();
+		      var posX = offset.left;
+		      var posY = offset.top;
+		      // transforme la position en %
+			 		posX = parseInt((posX * 100) / windowW);
+			 		posY = parseInt((posY * 100) / windowH);
+		      var id = $(this).attr('id')
+		      var rotation = getRotationDegrees($(this));
 		      higherZindex ++;
-		    	socket.emit("dragMediaPos", {text:textVal, x: posX, y:posY, zIndex:higherZindex, id:id, folder: currentFolder, fileName: fileName, rotation: randomRot });
+		    	socket.emit("dragMediaPos", {text:textVal, x: posX, y:posY, zIndex:higherZindex, id:id, folder: currentFolder, fileName: fileName, rotation: rotation });
 		    }
 			});
 		});
@@ -209,8 +219,8 @@ function onListMedias(dataArr){
 			  .attr('data-name', data.media)
 			  .css({
 			  	"width": mediaWidth + '%', 
-			  	"top": parseInt(data.y),
-			  	"left": parseInt(data.x),
+			  	"top": parseInt(data.y) + 'vh',
+			  	"left": parseInt(data.x) + '%',
 			  	"z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
@@ -230,8 +240,8 @@ function onListMedias(dataArr){
 				.attr('data-name', data.media)
 			  .css({
 			  	"width": mediaWidth + '%', 
-			  	"top": parseInt(data.y),
-			  	"left": parseInt(data.x),
+			  	"top": parseInt(data.y) + 'vh',
+			  	"left": parseInt(data.x) + '%',
 			  	"z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
@@ -250,8 +260,8 @@ function onListMedias(dataArr){
 				.attr('data-name', data.media)
 			  .css({
 			  	"width": mediaWidth + '%', 
-			  	"top": parseInt(data.y),
-			  	"left": parseInt(data.x),
+			  	"top": parseInt(data.y) + 'vh',
+			  	"left": parseInt(data.x) + '%',
 			  	"z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
