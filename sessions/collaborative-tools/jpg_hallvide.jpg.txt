@@ -1,0 +1,32 @@
+media: jpg_hallvide.jpg
+
+----
+
+id: jpg_hallvide-jpg
+
+----
+
+x: 21
+
+----
+
+y: 52
+
+----
+
+z: 158
+
+----
+
+width: 9
+
+----
+
+rotation: 358
+
+----
+
+text: undefined
+
+----
+
