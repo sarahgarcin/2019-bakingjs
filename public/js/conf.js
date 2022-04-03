@@ -1,9 +1,12 @@
 /* VARIABLES */
 var socket = io.connect();
-// var zIndex = 0;
+
 var currentFolder = window.location.pathname.replace(/^\/([^\/]*).*$/, '$1');;
 var windowW = window.innerWidth;
 var windowH = window.innerHeight; 
+
+// gestion du z-index
+var higherZindex = 0;
 
 /* sockets */
 socket.on('connect', onSocketConnect);
@@ -11,7 +14,7 @@ socket.on('error', onSocketError);
 
 socket.on('listAllMedias', onListMedias);
 socket.on('newMedia', onNewMedia);
-socket.on('mediaPosition', onMediaPosition);
+socket.on('mediaChange', onMediaChange);
 socket.on('mediaRemoved', onMediaRemoved);
 // socket.on('mediaDragPosition', onMediaDragPosition);
 // socket.on('mediaDragPositionForAll', onMediaDragPositionForAll);
@@ -66,11 +69,11 @@ function init(){
  		// console.log(fileName, fileExt);	
  		// le z-index ne fonctionne pas
  		// console.log(zIndex);
- 		// zIndex ++;
+ 		higherZindex ++;
  		var randomRot = Math.floor((Math.random() * 40) - 15);
  		console.log(posX, posY, id, randomRot);
     setTimeout(function(){
-			socket.emit("dropPosition", {mediaX:posX, mediaY:posY, id:id, rotation:randomRot, fileName : files[0].name, folder: currentFolder});
+			socket.emit("dropPosition", {mediaX:posX, mediaY:posY, id:id, rotation:randomRot, fileName : files[0].name, folder: currentFolder, zIndex : higherZindex});
   	},200);
   	// forward the file object to your ajax upload method
     return false;
@@ -141,14 +144,15 @@ function init(){
 			var offset = mediaItem.position();
       var posX = parseInt(offset.left);
       var posY = parseInt(offset.top);
-
-			socket.emit("textCreated", {text:textVal, x: posX, y:posY, id:id, folder: currentFolder, rotation: randomRot, name : slugText  });
+      higherZindex ++;
+			socket.emit("textCreated", {text:textVal, x: posX, y:posY, zIndex:higherZindex, id:id, folder: currentFolder, rotation: randomRot, name : slugText  });
 
 			mediaItem.draggable({
 				stack: "li", 
 				stop: function(event) {
 		      var fileName = slugText + ".md";
-		    	socket.emit("dragMediaPos", {text:textVal, x: posX, y:posY, id:id, folder: currentFolder, fileName: fileName, rotation: randomRot });
+		      higherZindex ++;
+		    	socket.emit("dragMediaPos", {text:textVal, x: posX, y:posY, zIndex:higherZindex, id:id, folder: currentFolder, fileName: fileName, rotation: randomRot });
 		    }
 			});
 		});
@@ -158,11 +162,23 @@ function init(){
 }
 
 function onListMedias(dataArr){
+
 	$.each( dataArr, function( i, data ) {
 		var path = "/"+currentFolder+"/"+data.media;
 		var id = data.id;
 		var ext = data.media.split('.').pop();
 		var mediaItem;
+
+		console.log(data, ext, mediaItem); 
+
+		// Get width of media
+		var mediaWidth;
+		if(data.width != undefined){
+			mediaWidth = data.width;
+		}
+		else{
+			mediaWidth = "25";
+		}
 
 
 		if(ext == 'jpg' || ext == "jpeg" || ext == "png" || ext == "gif" || ext == "JPG"){
@@ -174,9 +190,10 @@ function onListMedias(dataArr){
 			  .attr('id', id)
 			  .attr('data-name', data.media)
 			  .css({
+			  	"width": mediaWidth + '%', 
 			  	"top": parseInt(data.y) + 'vh',
 			  	"left": parseInt(data.x) + '%',
-			  	// "z-index":data.z,
+			  	"z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
 			  });
@@ -191,15 +208,14 @@ function onListMedias(dataArr){
 			  .attr('id', id)
 			  .attr('data-name', data.media)
 			  .css({
+			  	"width": mediaWidth + '%', 
 			  	"top": parseInt(data.y),
 			  	"left": parseInt(data.x),
-			  	// "z-index":data.z,
+			  	"z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
 			  });
 		}
-
-
 
 		if(ext == 'pdf'){
 			mediaItem = $(".js--templates .pdf").clone(false);
@@ -213,9 +229,10 @@ function onListMedias(dataArr){
 				.attr('id', id)
 				.attr('data-name', data.media)
 			  .css({
+			  	"width": mediaWidth + '%', 
 			  	"top": parseInt(data.y),
 			  	"left": parseInt(data.x),
-			  	// "z-index":data.z,
+			  	"z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
 			  });
@@ -232,37 +249,75 @@ function onListMedias(dataArr){
 				.attr('id', id)
 				.attr('data-name', data.media)
 			  .css({
+			  	"width": mediaWidth + '%', 
 			  	"top": parseInt(data.y),
 			  	"left": parseInt(data.x),
-			  	// "z-index":data.z,
+			  	"z-index":data.z,
 			  	"transform":"rotate("+parseInt(data.rotation)+"deg)",
 			  	"display":"block"
 			  });
 		}
 
 
-	$('.medias-list').append(mediaItem);
+		$('.medias-list').append(mediaItem);
 
-	// Quand je drag and drop une image par la suite = changement de position à enregistrer
-	mediaItem.draggable({
-		stack: "li", 
-		stop: function(event) {
-    	var offset = $(this).position();
-      var posX = offset.left;
-      var posY = offset.top;
-      // transforme la position en %
-	 		posX = parseInt((posX * 100) / windowW);
-	 		posY = parseInt((posY * 100) / windowH);
-      var id = $(this).attr('id')
-      var rotation = getRotationDegrees($(this));
-      // on envoie la data text seulement pour les fichiers textes
-    	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: data.media, rotation: rotation, text : data.text  });
-    }
-	});
+		// Récupère le plus grand z-index 
+		$(".medias-list li").each(function() {
+	    // always use a radix when using parseInt
+	    var index_current = parseInt($(this).css("zIndex"), 10);
+	    if(index_current > higherZindex) {
+	        higherZindex = index_current;
+	    }
+		});
 
-	mediaItem.resizable({
-    aspectRatio: true
-  });
+		// Quand je drag and drop une image par la suite = changement de position à enregistrer
+		mediaItem.draggable({
+			stack: "li", 
+			stop: function(event) {
+				// get size of media
+				var width = $(this).width();
+        // transforme la taille en %
+        width = parseInt((width * 100) / windowW);
+        console.log("resize", width);
+
+	    	var offset = $(this).position();
+	      var posX = offset.left;
+	      var posY = offset.top;
+	      // transforme la position en %
+		 		posX = parseInt((posX * 100) / windowW);
+		 		posY = parseInt((posY * 100) / windowH);
+	      var id = $(this).attr('id')
+	      var rotation = getRotationDegrees($(this));
+	      higherZindex ++;
+	      // on envoie la data text seulement pour les fichiers textes
+	    	socket.emit("dragMediaPos", {x: posX, y:posY, zIndex:higherZindex, width: width,  id:id, folder: currentFolder, fileName: data.media, rotation: rotation, text : data.text  });
+	    }
+		});
+
+		// Redimensionner les médias
+		mediaItem.bind('resizestop',function() {   
+	  }).resizable({
+	   		aspectRatio: true,
+	      stop : function() {
+	        var width = $(this).width();
+	        // transforme la taille en %
+	        width = parseInt((width * 100) / windowW);
+	        console.log("resize", width);
+
+	        var offset = $(this).position();
+		      var posX = offset.left;
+		      var posY = offset.top;
+		      // transforme la position en %
+			 		posX = parseInt((posX * 100) / windowW);
+			 		posY = parseInt((posY * 100) / windowH);
+		      var id = $(this).attr('id')
+		      var rotation = getRotationDegrees($(this));
+		      higherZindex ++;
+
+	        socket.emit("resizeMedia", {x: posX, y:posY, zIndex:higherZindex,  id:id, folder: currentFolder, fileName: data.media, rotation: rotation, width: width,  text : data.text  });
+	      }
+	  });
+
 
 
 	// rendre les medias draggable
@@ -280,7 +335,7 @@ function onListMedias(dataArr){
  //    }
  //  });
 
-});
+	});
 
   // ajouter un attribut paysage ou portrait pour définir une taille rationnelle
   // setTimeout(function(){
@@ -336,10 +391,9 @@ function onNewMedia(data){
 		  .end()
 		  .attr('id', id)
 		  .attr('data-name', data.name)
-		  ;
-		  // .css({
-		  // 	"zIndex": zIndex
-		  // });
+		  .css({
+		  	"z-index": data.z
+		  });
 	}
 
 	if(ext == 'mp4' || ext == "avi" || ext == "ogg" || ext == "mov" || ext == "webm"){
@@ -350,10 +404,9 @@ function onNewMedia(data){
 		  .end()
 		  .attr('id', id)
 		  .attr('data-name', data.name)
-		  ;
-		  // .css({
-		  // 	"zIndex": zIndex
-		  // });
+		  .css({
+		  	"z-index": data.z
+		  });
 	}
 
 	if(ext == 'pdf'){
@@ -367,10 +420,9 @@ function onNewMedia(data){
 		  .end()
 		  .attr('id', id)
 		  .attr('data-name', data.name)
-		  ;
-		  // .css({
-		  // 	"zIndex": zIndex
-		  // });
+		  .css({
+		  	"z-index": data.z
+		  });
 	}
 
 	if(ext == 'md'){
@@ -382,7 +434,10 @@ function onNewMedia(data){
 		  .end()
 		  .append('<p>'+data.text+'</p>')
 			.attr('id', id)
-			.attr('data-name', data.nasme)
+			.attr('data-name', data.name)
+			.css({
+		  	"z-index": data.z
+		  });
 		  // .css({
 		  // 	"top": parseInt(data.y),
 		  // 	"left": parseInt(data.x),
@@ -399,6 +454,15 @@ function onNewMedia(data){
 	mediaItem.draggable({
 		stack: "li", 
 		stop: function(event) {
+			// get size of media
+			var width = $(this).width();
+      // transforme la taille en %
+      width = parseInt((width * 100) / windowW);
+      if(width == undefined){
+      	width = 25;
+      }
+      console.log("drag width", width);
+
     	var offset = $(this).position();
       var posX = offset.left;
       var posY = offset.top;
@@ -409,13 +473,33 @@ function onNewMedia(data){
       var rotation = getRotationDegrees($(this))
       // var filePath = $(this).find('img').attr('src');
       // var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-    	socket.emit("dragMediaPos", {x: posX, y:posY, id:id, folder: currentFolder, fileName: data.name, rotation: rotation });
+      higherZindex ++;
+    	socket.emit("dragMediaPos", {x: posX, y:posY, zIndex:higherZindex, id:id, folder: currentFolder, fileName: data.name, rotation: rotation, width: width });
     }
 
 	});
 
-	mediaItem.resizable({
-    aspectRatio: true
+	mediaItem.bind('resizestop',function() {   
+  }).resizable({
+   		aspectRatio: true,
+      stop : function() {
+        var width = $(this).width();
+        // transforme la taille en %
+        width = parseInt((width * 100) / windowW);
+        console.log("resize", width);
+
+        var offset = $(this).position();
+	      var posX = offset.left;
+	      var posY = offset.top;
+	      // transforme la position en %
+		 		posX = parseInt((posX * 100) / windowW);
+		 		posY = parseInt((posY * 100) / windowH);
+	      var id = $(this).attr('id')
+	      var rotation = getRotationDegrees($(this));
+	      higherZindex ++;
+
+        socket.emit("resizeMedia", {x: posX, y:posY, zIndex:higherZindex,  id:id, folder: currentFolder, fileName: data.name, rotation: rotation, width: width,  text : data.text  });
+      }
   });
 
 
@@ -443,7 +527,7 @@ function onMediaRemoved(mediaData){
 	$('#' + mediaData.id).css('display', 'none');
 }
 
-function onMediaPosition(mediaData){
+function onMediaChange(mediaData){
 	// $(".drop-files-container").css("z-index", -1);
 	// var mediaW = $(".medias-list li.no-position").width();
 	// var mediaH = $(".medias-list li.no-position").height();
@@ -455,13 +539,24 @@ function onMediaPosition(mediaData){
 	// else{
 	// 	orientation = "portrait";
 	// }
+	console.log('on MEDIA CHANGE');
+	console.log(mediaData);
 
-	console.log(mediaData.id);
+	// Get width of media
+	var mediaWidth;
+	if(mediaData.width != undefined){
+		mediaWidth = mediaData.width;
+	}
+	else{
+		mediaWidth = "25";
+	}
 
 	$("#" + mediaData.id)
 		.css({
+			"width": mediaWidth  + "%",
 			"top": mediaData.y + 'vh',
 	  	"left":mediaData.x + '%',
+	  	"z-index": mediaData.z,
 	  	"transform":"rotate("+mediaData.rotation+"deg)",
 	  	"display":"block"
 		})

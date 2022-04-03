@@ -24,6 +24,8 @@ module.exports = function(app, io){
     socket.on( 'listAllMedias', function (data){ onListMedias(data, socket); });
     socket.on('dropPosition', function (data){ onDropPosition(data); });
     socket.on('dragMediaPos', function (data){ onDragMediaPos(data, socket); });
+    socket.on('resizeMedia', function (data){ onResizeMedia(data, socket); });
+
     socket.on('removeMedia', function (data){ onRemoveMedia(data, socket); });
     socket.on('clearPad', function (data){ onClearPad(data, socket); });
     socket.on('textCreated', function (data){ onTextCreated(data, socket); });
@@ -145,6 +147,7 @@ module.exports = function(app, io){
           "id" : mediaData.id, 
           "x" : mediaData.mediaX,
           "y" : mediaData.mediaY, 
+          "z" : mediaData.zIndex,
           "rotation" : mediaData.rotation
         };
       // storeData(mediaMetaPath, fmeta, "update").then(function( meta) {
@@ -161,7 +164,7 @@ module.exports = function(app, io){
             )}`
           );
           resolve();
-          sendEventWithContent( 'mediaPosition', fmeta);
+          sendEventWithContent( 'mediaChange', fmeta);
         },
         function (err) {
           reject(`Couldn't update folder meta : ${err}`);
@@ -184,7 +187,9 @@ module.exports = function(app, io){
           "media" : mediaData.fileName,
           "id" : mediaData.id, 
           "x" : mediaData.x,
-          "y" : mediaData.y, 
+          "y" : mediaData.y,
+          "z" : mediaData.zIndex,
+          "width" : mediaData.width, 
           "rotation" : mediaData.rotation, 
           "text" : mediaData.text
         };
@@ -198,7 +203,45 @@ module.exports = function(app, io){
             )}`
           );
           resolve();
-          sendEventWithContent( 'mediaPosition', fmeta, socket, true);
+          sendEventWithContent( 'mediaChange', fmeta, socket, true);
+        },
+        function (err) {
+          reject(`Couldn't update folder meta : ${err}`);
+        }
+      );
+    });
+  }
+
+  function onResizeMedia(mediaData, socket){
+    return new Promise(function(resolve, reject) {
+      console.log("------ ON RESIZE MEDIA");
+      console.log(mediaData);
+      let folderPath = getFullPath(mediaData.folder);
+      let mediaMetaPath = getMetaFileOfMedia(folderPath, mediaData.fileName);
+      console.log(mediaMetaPath);
+      // update meta data file 
+      var fmeta =
+        {
+          "media" : mediaData.fileName,
+          "id" : mediaData.id, 
+          "x" : mediaData.x,
+          "y" : mediaData.y,
+          "z" : mediaData.zIndex, 
+          "width" : mediaData.width,
+          "rotation" : mediaData.rotation, 
+          "text" : mediaData.text
+        };
+      storeData(mediaMetaPath, fmeta, "update").then(
+        (meta) => {
+          console.log(
+            `Updated media meta file at path: ${mediaMetaPath} with meta: ${JSON.stringify(
+              meta,
+              null,
+              4
+            )}`
+          );
+          resolve();
+          sendEventWithContent( 'mediaChange', fmeta, socket, true);
         },
         function (err) {
           reject(`Couldn't update folder meta : ${err}`);
@@ -356,6 +399,7 @@ module.exports = function(app, io){
               "id" : slugg(data.id), 
               "x" : data.x,
               "y": data.y,
+              "z" : data.zIndex,
               "rotation" : data.rotation, 
               "text" : data.text
             };
@@ -372,6 +416,7 @@ module.exports = function(app, io){
             "id" : slugg(data.id), 
             "x" : data.x,
             "y": data.y,
+            "z" : data.zIndex,
             "rotation" : data.rotation,
             "text" : data.text
           };
