@@ -2,26 +2,26 @@ doctype html
 html
   include snippets/head.jade
   body(class='index')
-    header.col-xs-12.col-md-offset-1.col-md-10
+    header.col-xs-11.col-xs-offset-1.col-md-offset-1.col-md-10
       h1 baking.js
 
     div.container
       div.row
-        div.left.col-xs-3.col-md-offset-1
+        div.left.col-xs-5.col-xs-offset-1.col-md-3.col-md-offset-1
           div.add-new-conf-wrapper
             h2 Créer une conférence
-            form(onsubmit='return false;' class='add-new-conf-form')
-              input(type="date" class="date" placeholder='Date')
-              input(type="text" class="titre" placeholder='Titre')
-              input(type="text" class="lieu" placeholder='Lieu')
-              input(type="text" class="auteur" placeholder='Auteur(s)')
-              input(type='submit' class='js-add-conf' value='Ajouter')
-        div.right.col-xs-7
+            form(onsubmit='return false;', class='add-new-conf-form')
+              input(type="date", class="date", placeholder='Date')
+              input(type="text", class="titre", placeholder='Titre')
+              input(type="text", class="lieu", placeholder='Lieu')
+              input(type="text", class="auteur", placeholder='Auteur(s)')
+              input(type='submit', class='js-add-conf', value='Ajouter')
+        div.right.col-xs-5.col-md-7
           ul.dossier-list.row
             //- h2 Conférences
 
     .js--templates.row
-      li.dossier.col-xs-6.col-md-4(data-nom)
+      li.dossier.col-xs-12.col-md-4(data-nom)
         .dossier-inside
           .content
             a.folder-link(href title)
@@ -42,6 +42,4 @@ html
 
     include snippets/footer.jade
     //- specific scripts
-    script(src='/js/index.js')
-
-
+    script(src="/js/index.js")

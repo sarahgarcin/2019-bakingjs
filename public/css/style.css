@@ -114,10 +114,15 @@ body.index {
 }
 
 body.conf {
-  overflow: hidden;
+  /*overflow: hidden;*/
+  overflow-x: hidden;
+  height: 300vh;
+  /*width:100%;*/
 }
 body.conf header {
   padding: 10px 20px;
+  position: fixed; 
+  width:100%;
 }
 body.conf header h1 {
   margin: 0;
@@ -138,6 +143,28 @@ body.conf header h3 {
 }
 body.conf input {
   opacity: 0;
+  position: fixed; 
+  bottom: 20px;
+  left: 20px;
+  z-index: 9990;
+}
+
+body.conf input + label {
+  position: fixed; 
+  z-index: 9990;
+  background: #FFF;
+  color: #0027a4;
+  padding: 10px 20px;
+  border: 1px dashed #0027a4;
+  bottom: 130px;
+  right: 20px;
+  cursor: pointer;
+  transition: all 0.2s linear;
+}
+
+body.conf input + label:hover {
+  background: #0027a4;
+  color: #FFF;
 }
 
 .drop-files-container {
@@ -146,7 +173,7 @@ body.conf input {
   position: fixed;
   z-index: 9999;
   pointer-events: none;
-  top: 0;
+  top: 40px;
   left: 0;
 }
 .drop-files-container.dragover {
@@ -155,11 +182,13 @@ body.conf input {
 }
 
 .medias-list {
-  min-height: 100vh;
+  height: 300vh;
   width: 100%;
   position: absolute;
-  top: 0;
+  top: 40px;
   left: 0;
+  margin:0;
+  padding:0;
 }
 .medias-list li {
   top: 0;
@@ -230,7 +259,7 @@ body.conf input {
 }
 
 .clear-btn {
-  position: absolute;
+  position: fixed;
   z-index: 9990;
   background: #FFF;
   color: #0027a4;
@@ -352,3 +381,19 @@ body.conf input {
 .js--templates {
   display: none;
 }
+
+@media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
+  .clear-btn, body.conf input + label, .text-btn {
+   font-size: 4em; 
+   padding-left: 40px;
+   padding-right: 40px;
+  }
+  .text-btn {
+    bottom: 150px;
+  }
+  body.conf input + label{
+    bottom: 280px;
+  }
+}
+
+

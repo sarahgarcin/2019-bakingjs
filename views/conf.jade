@@ -1,13 +1,10 @@
 doctype html
 html
-  //- head
-  //-   link(rel='stylesheet', href='/css/style.css')
-  //-   title #{title} | Baking.js
   include snippets/head.jade
   body.conf
     header.col-xs-12.row
       h1.col-xs-2 
-        a(href="/" title="baking.js") baking.js
+        a(href="/", title="baking.js") baking.js
       h3.col-xs-3  #{title}
       h3.col-xs-2  #{date}
       h3.col-xs-3  #{lieu}
@@ -15,33 +12,24 @@ html
     
     .drop-files-container
 
-    form(enctype="multipart/form-data" id="form")
-     input(type="file" name="files[]" multiple="multiple")
+    form(enctype="multipart/form-data", id="form")
+      input(type="file", name="files[]", multiple="multiple", id="file")
+      label(for="file") ⇧
 
 
     ul.medias-list
-      
-
-    //- .elif
-    //-   h3 #{title}
-    //-   h3 #{date}
-    //-   h3 #{lieu}
-    //-   h3 #{auteur}
 
     .js--templates
       li.image
         img
         div.delete-btn X
-        //- div.zoom-btn ↘
       li.video
         video(autobuffer autoplay muted)
           source()
         div.delete-btn X
-        //- div.zoom-btn ↘
       li.pdf
         a
         div.delete-btn X
-        //- div.zoom-btn ↘
       li.text
         textarea
         div.submit-btn OK
@@ -62,12 +50,4 @@ html
 
 
     include snippets/footer.jade
-    //- script(src='/socket.io/socket.io.js')
-    //- script(src='/bower_components/jquery/dist/jquery.min.js')
-    //- script(src='/bower_components/jquery-ui/jquery-ui.min.js')
-    //- script(src='/js/libs/jquery.ui.touch-punch.min.js')
-    //- script(src='/bower_components/foundation/js/foundation.min.js')
-
     script(src='/js/conf.js')
-
-

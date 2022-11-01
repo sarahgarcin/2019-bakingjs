@@ -58,7 +58,8 @@ function init(){
     $(".drop-files-container").css('pointer-events', "none");
     //file data to display it correctly
     var posX = e.offsetX;
- 		var posY = e.offsetY;
+ 		// var posY = e.offsetY;
+ 		var posY = window.scrollY;
  		// transforme la position en %
  		posX = parseInt((posX * 100) / windowW);
  		posY = parseInt((posY * 100) / windowH); 
@@ -74,10 +75,47 @@ function init(){
  		console.log(posX, posY, id, randomRot);
     setTimeout(function(){
 			socket.emit("dropPosition", {mediaX:posX, mediaY:posY, id:id, rotation:randomRot, fileName : files[0].name, folder: currentFolder, zIndex : higherZindex});
-  	},200);
+  	},1000);
   	// forward the file object to your ajax upload method
     return false;
 	});
+
+	// Upload image(s) with the upload button
+	const form = $("#form");
+	const inputFile = $("#file");
+
+	const formData = new FormData();
+
+	const handleSubmit = (files) => {
+	    console.log(files[0]);
+	    processFileUpload(files)
+	    	// console.log('function is called after ajax success', files);
+		    //file data to display it correctly
+		 		var posY = window.scrollY;
+		 		// transforme la position en %
+		 		posX = 50;
+		 		posY = parseInt((posY * 100) / windowH); 
+		 		var id = convertToSlug(files[0].name);
+
+		 		higherZindex ++;
+		 		var randomRot = Math.floor((Math.random() * 40) - 15);
+		 		console.log(posX, posY, id, randomRot);
+		    setTimeout(function(){
+					socket.emit("dropPosition", {mediaX:posX, mediaY:posY, id:id, rotation:randomRot, fileName : files[0].name, folder: currentFolder, zIndex : higherZindex});
+		  	},3000);
+	    return false;
+	};
+
+	// Quand une image est uploadée - trigger event on input change
+	// $("#form").on("change", event => {
+	//   const files = event.target.files;
+	//   handleSubmit(files);
+	// });
+	$(document).on("change", "#form", event => {
+	  const files = event.target.files;
+	  handleSubmit(files);
+	});
+    
 
 	// Supprimer un média
 	$('body').on('click', '.delete-btn', function(){
@@ -179,7 +217,7 @@ function onListMedias(dataArr){
 		var ext = data.media.split('.').pop();
 		var mediaItem;
 
-		console.log(data, ext, mediaItem); 
+		// console.log(data, ext, mediaItem); 
 
 		// Get width of media
 		var mediaWidth;
@@ -549,8 +587,8 @@ function onMediaChange(mediaData){
 	// else{
 	// 	orientation = "portrait";
 	// }
-	console.log('on MEDIA CHANGE');
-	console.log(mediaData);
+	// console.log('on MEDIA CHANGE');
+	// console.log(mediaData);
 
 	// Get width of media
 	var mediaWidth;
@@ -613,7 +651,7 @@ function onSocketError(reason) {
 
 
 
-function processFileUpload(droppedFiles) {
+function processFileUpload(droppedFiles, callback) {
   // add your files to the regular upload form
   var uploadFormData = new FormData($("#form")[0]); 
   if(droppedFiles.length > 0) { // checks if any files were dropped
@@ -632,9 +670,11 @@ function processFileUpload(droppedFiles) {
   cache : false,
   contentType : false,
   processData : false,
-  success : function(ret) {
-    // callback function
-    console.log(ret);
+  success : function(ret){
+  	console.log(ret);
+  },
+  error: function(request, error) {
+      console.log(request, error);
   }
  });
 
