@@ -207,6 +207,49 @@ function init(){
 
 	});
 
+	// Afficher la lightbox et naviguer dedans
+	var $lightbox = $(".lightbox");
+	$('body').on('click', '.open-lightbox', function(){	
+		var $thisImg = $(this).parents('li');
+		var $thisId = $thisImg.attr('id');
+		var $thisSrc = $thisImg.find('img').attr('src');
+		$lightbox.find('figure img').attr('src', $thisSrc);
+		$lightbox.find('figure').attr('data-id', $thisId);
+		$lightbox.css('display', 'block');
+	});
+
+	$(".lightbox .go-next").on('click', function(){
+		var lightboxImg = $lightbox.find('figure').attr('data-id');
+		var $nextImage = $("#"+lightboxImg).next('li');
+		if(lightboxImg == "undefined"){
+			$nextImage = $('.medias-list li').first();
+		}
+		var $nextImageId = $nextImage.attr('id');
+		var $nextImageSrc = $nextImage.find('img').attr('src');
+		console.log($nextImage);
+		$lightbox.find('figure img').attr('src', $nextImageSrc);
+		$lightbox.find('figure').attr('data-id', $nextImageId);
+	});
+
+	$(".lightbox .go-prev").on('click', function(){
+		var lightboxImg = $lightbox.find('figure').attr('data-id');
+		var $prevImage = $("#"+lightboxImg).prev('li');
+		// console.log(lightboxImg, $('.medias-list li').first().attr('id'));
+		// if(lightboxImg == $('.medias-list li').first().attr('id')){
+		// 	console.log($('.medias-list li').last());
+		// 	$prevImage = $('.medias-list li').last();
+		// }
+		var $prevImageId = $prevImage.attr('id');
+		var $prevImageSrc = $prevImage.find('img').attr('src');
+		console.log($prevImage.find('img').attr('src'));
+		$lightbox.find('figure img').attr('src', $prevImageSrc);
+		$lightbox.find('figure').attr('data-id', $prevImageId);
+	});
+
+	$(".close-lightbox").on('click', function(){
+		$(".lightbox").css('display', 'none');
+	});
+
 }
 
 function onListMedias(dataArr){

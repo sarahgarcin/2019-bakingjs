@@ -19,12 +19,21 @@ html
 
     ul.medias-list
 
+    .lightbox
+      .lightbox-inner
+        figure.image-lightbox(data-id="")
+          img(src="")
+      div.close-lightbox X
+      div.go-prev.go-btn <
+      div.go-next.go-btn >
+
     .js--templates
       li.image
         img
         div.delete-btn X
+        div.open-lightbox ☉
       li.video
-        video(autobuffer autoplay muted)
+        video(autobuffer muted autoplay loop)
           source()
         div.delete-btn X
       li.pdf

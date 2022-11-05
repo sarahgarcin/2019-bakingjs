@@ -116,7 +116,7 @@ body.index {
 body.conf {
   /*overflow: hidden;*/
   overflow-x: hidden;
-  height: 300vh;
+  height: 600vh;
   /*width:100%;*/
 }
 body.conf header {
@@ -181,8 +181,73 @@ body.conf input + label:hover {
   opacity: 0.5;
 }
 
+.lightbox{
+  position: fixed; 
+  top: 0;
+  left:0;
+  right:0;
+  bottom:0;
+  width:100%;
+  height: 100vh;
+  background: rgba(0, 39, 164, 0.8);
+  z-index: 9999;
+  display: none;
+}
+
+.lightbox-inner{
+  position: relative;
+  width:100%;
+  height: 100vh;
+}
+
+.lightbox figure{
+  margin:0;
+ height:90vh;
+ position: absolute;
+ top: 5vh;
+ left:50%;
+ transform: translateX(-50%);
+}
+
+.lightbox figure img{
+ height:100%;
+}
+
+.lightbox .close-lightbox{
+  position: fixed;
+  top: 10px; 
+  right:20px;
+  color: #FFF;
+  font-family: "Fira Sans", sans-serif;
+  font-size: 1em;
+  cursor:pointer;
+  border: 1px solid #FFF;
+  border-radius: 50%;
+  padding: 5px 10px;
+}
+
+.lightbox .go-btn{
+  position: fixed;
+  top: calc(50vh - 30px); 
+  color: #FFF;
+  font-family: "Fira Sans", sans-serif;
+  font-size: 2em;
+  cursor:pointer;
+  border: 1px solid #FFF;
+  border-radius: 50%;
+  padding: 5px 15px;
+}
+
+.lightbox .go-btn.go-next{
+  right: 30px;
+}
+
+.lightbox .go-btn.go-prev{
+  left: 30px;
+}
+
 .medias-list {
-  height: 300vh;
+  height: 600vh;
   width: 100%;
   position: absolute;
   top: 40px;
@@ -190,6 +255,7 @@ body.conf input + label:hover {
   margin:0;
   padding:0;
 }
+
 .medias-list li {
   top: 0;
   left: 0;
@@ -246,6 +312,32 @@ body.conf input + label:hover {
   background: #0027a4;
   color: #FFF;
 }
+
+.medias-list li:hover .open-lightbox {
+  display: block;
+}
+
+.medias-list li .open-lightbox {
+  display: none;
+  position: absolute;
+  font-family: "Fira Sans", sans-serif;
+  color: #0027a4;
+  border: 1px solid #0027a4;
+  border-radius: 50%;
+  padding: 7px 12px;
+  top: -15px;
+  left: -15px;
+  background: #FFF;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.2s linear;
+}
+
+.medias-list li .open-lightbox:hover {
+  background: #0027a4;
+  color: #FFF;
+}
+
 .medias-list li .zoom-btn {
   position: absolute;
   font-family: "Fira Sans", sans-serif;
