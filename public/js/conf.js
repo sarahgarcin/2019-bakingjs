@@ -149,6 +149,7 @@ function init(){
 		var randomRot = Math.floor((Math.random() * 40) - 15);
 		higherZindex ++;
 		mediaItem.css({
+			'top' : parseInt(window.scrollY) + "px",
 			'transform' : "rotate("+randomRot+"deg)",
 			'z-index' : higherZindex
 		});
@@ -183,7 +184,8 @@ function init(){
 			var slugText = convertToSlug(textVal);
 			var offset = mediaItem.position();
       var posX = parseInt(offset.left);
-      var posY = parseInt(offset.top);
+      // var posY = parseInt(offset.top);
+      var posY = parseInt(window.scrollY);
       higherZindex ++;
 			socket.emit("textCreated", {text:textVal, x: posX, y:posY, zIndex:higherZindex, id:id, folder: currentFolder, rotation: randomRot, name : slugText  });
 
@@ -336,7 +338,7 @@ function onListMedias(dataArr){
 			  .end()
 			  .find('.submit-btn').remove()
 			  .end()
-			  .append('<p>'+data.text+'</p>')
+			  .append('<p>'+linkify(data.text)+'</p>')
 				.attr('id', id)
 				.attr('data-name', data.media)
 			  .css({
@@ -523,7 +525,7 @@ function onNewMedia(data){
 		  .end()
 		  .find('.submit-btn').remove()
 		  .end()
-		  .append('<p>'+data.text+'</p>')
+		  .append('<p>'+linkify(data.text)+'</p>')
 			.attr('id', id)
 			.attr('data-name', data.name)
 			.css({
@@ -762,4 +764,23 @@ function getRotationDegrees(obj) {
         var angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
     } else { var angle = 0; }
     return (angle < 0) ? angle + 360 : angle;
+}
+
+// convert to link
+function linkify(inputText) {
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    return replacedText;
 }

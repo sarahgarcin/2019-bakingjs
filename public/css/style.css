@@ -30,6 +30,9 @@ body, html {
 li {
   list-style: none;
 }
+a, a:visited{
+  color: #0027a4;;
+}
 
 body {
   margin: 0;
@@ -116,7 +119,7 @@ body.index {
 body.conf {
   /*overflow: hidden;*/
   overflow-x: hidden;
-  height: 600vh;
+  height: 700vh;
   /*width:100%;*/
 }
 body.conf header {
@@ -247,7 +250,7 @@ body.conf input + label:hover {
 }
 
 .medias-list {
-  height: 600vh;
+  height: 700vh;
   width: 100%;
   position: absolute;
   top: 40px;
